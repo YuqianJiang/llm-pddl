@@ -1,0 +1,376 @@
+version: 1
+entities:
+  - concept: "table"
+    attributes:
+      - name: is_a
+        value:
+          concept: "location"
+  - concept: "shelf"
+    attributes:
+      - name: is_a
+        value:
+          concept: "location"
+  - concept: "window"
+    attributes:
+      - name: is_a
+        value:
+          concept: "location"
+  - concept: "light"
+    attributes:
+      - name: is_a
+        value:
+          concept: "location"
+  - concept: "tv"
+    attributes:
+      - name: is_a
+        value:
+          concept: "location"
+  - instance: ["robot", "robot"]
+    attributes:
+      - name: is_near
+        value:
+          instance: ["joshua_bedroom_table", "table" ]
+      - name: hand_empty
+        value: true
+      - name: is_in
+        value:
+          instance: ["joshua_bedroom", "room"]
+  - instance: ["living_room", "room"]
+    attributes:
+    - name: has
+      value: 
+        instance: ["living_room_tv", "tv"]
+    - name: has
+      value: 
+        instance: ["living_room_shelf", "shelf"]
+    - name: has
+      value: 
+        instance: ["living_room_window", "window"]
+    - name: has
+      value: 
+        instance: ["living_room_overhead", "light"]
+    - name: has
+      value: 
+        instance: ["living_room_table", "table"]
+  - instance: ["living_room_shelf", "shelf"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["living_room", "room"]
+    - name: has
+      value:
+        instance: ["living_room_shelf_1", "surface"]
+    - name: has
+      value:
+        instance: ["living_room_shelf_2", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_3", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_4", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_5", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_6", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_7", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_8", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_9", "surface" ]
+    - name: has
+      value:
+        instance: ["living_room_shelf_10", "surface" ]
+  - instance: ["living_room_window", "window"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["living_room", "room"]
+    - name: is_window_open
+      value: false
+  - instance: ["living_room_table", "table"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["living_room", "room"]
+  - instance: ["living_room_tv", "tv"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["living_room", "room"]
+    - name: is_tv_on
+      value: true
+    - name: channel_playing
+      value: 
+        instance: ["espn", "tv_channel"]
+  - instance: ["living_room_overhead", "light"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["living_room", "room"]
+    - name: is_light_on
+      value: false
+  - instance: ["kitchen", "room"]
+    attributes:
+    - name: has
+      value: 
+        instance: ["kitchen_fridge", "fridge"]
+    - name: has
+      value: 
+        instance: ["kitchen_overhead", "light"]
+    - name: has
+      value: 
+        instance: ["kitchen_sink", "sink"]
+  - instance: ["kitchen_sink", "sink"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["kitchen", "kitchen"]
+    - name: is_faucet_on
+      value: true
+  - instance: ["kitchen_fridge", "fridge"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["kitchen", "kitchen"]
+  - instance: ["kitchen_overhead", "light"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["kitchen", "kitchen"]
+    - name: is_light_on
+      value: false
+  - instance: ["stephanie_bedroom", "room"]
+    attributes:
+    - name: has
+      value: 
+        instance: ["stephanie_bedroom_tv", "tv"]
+    - name: has
+      value: 
+        instance: ["stephanie_bedroom_shelf", "shelf"]
+    - name: has
+      value: 
+        instance: ["stephanie_bedroom_window", "window"]
+    - name: has
+      value: 
+        instance: ["stephanie_br_overhead", "light"]
+    - name: has
+      value: 
+        instance: ["stephanie_bedroom_table", "table"]
+  - instance: ["stephanie_br_overhead", "light"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["stephanie_bedroom", "room"]
+    - name: is_light_on
+      value: true
+  - instance: ["stephanie_bedroom_shelf", "shelf"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["stephanie_bedroom", "room"]
+    - name: has
+      value:
+        instance: ["stephanie_br_shelf_1", "surface" ]
+    - name: has
+      value:
+        instance: ["stephanie_br_shelf_2", "surface" ]
+    - name: has
+      value:
+        instance: ["stephanie_br_shelf_3", "surface" ]
+    - name: has
+      value:
+        instance: ["stephanie_br_shelf_4", "surface" ]
+  - instance: ["stephanie_bedroom_tv", "tv"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["stephanie_bedroom", "room"]
+    - name: is_tv_on
+      value: true
+    - name: channel_playing
+      value: 
+        instance: ["espn", "tv_channel"]
+  - instance: ["stephanie_bedroom_table", "table"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["stephanie_bedroom", "room"]
+  - instance: ["stephanie_bedroom_window", "window"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["stephanie_bedroom", "room"]
+    - name: is_window_open
+      value: false
+  - instance: ["joshua_bedroom", "room"]
+    attributes:
+    - name: has
+      value: 
+        instance: ["joshua_bedroom_tv", "tv"]
+    - name: has
+      value: 
+        instance: ["joshua_bedroom_shelf", "shelf"]
+    - name: has
+      value: 
+        instance: ["joshua_bedroom_window", "window"]
+    - name: has
+      value: 
+        instance: ["joshua_bedroom_overhead", "light"]
+    - name: has
+      value: 
+        instance: ["joshua_bedroom_table", "table"]
+  - instance: ["joshua_bedroom_overhead", "light"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["joshua_bedroom", "room"]
+    - name: is_light_on
+      value: true
+  - instance: ["joshua_bedroom_tv", "tv"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["joshua_bedroom", "room"]
+    - name: is_tv_on
+      value: true
+    - name: channel_playing
+      value: 
+        instance: ["espn", "tv_channel"]
+  - instance: ["joshua_bedroom_window", "window"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["joshua_bedroom", "room"]
+    - name: is_window_open
+      value: true
+  - instance: ["joshua_bedroom_table", "table"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["joshua_bedroom", "room"]
+  - instance: ["joshua_bedroom_shelf", "shelf"]
+    attributes:
+    - name: in_room
+      value: 
+        instance: ["joshua_bedroom", "room"]
+    - name: has
+      value:
+        instance: ["joshua_bedroom_shelf_1", "surface" ]
+    - name: has
+      value:
+        instance: ["joshua_bedroom_shelf_2", "surface" ]
+    - name: has
+      value:
+        instance: ["joshua_bedroom_shelf_3", "surface" ]
+    - name: has
+      value:
+        instance: ["joshua_bedroom_shelf_4", "surface" ]
+    - name: has
+      value:
+        instance: ["joshua_bedroom_shelf_5", "surface" ]
+  - instance: ["pineapple", "food"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["living_room_table", "table"]
+  - instance: ["knife", "kitchenware"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["kitchen_sink", "sink"]
+  - instance: ["the_prince_book", "book"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["joshua_bedroom_table", "table"]
+  - instance: ["the_road_book", "book"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["living_room_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: ["living_room_shelf_8", "surface" ]
+  - instance: ["lemon", "food"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["stephanie_bedroom_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: ["stephanie_br_shelf_1", "surface" ]
+  - instance: ["bowl", "kitchenware"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["stephanie_bedroom_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: [ "stephanie_br_shelf_1", "surface" ]
+  - instance: ["fork", "kitchenware"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["stephanie_bedroom_table", "table"]
+  - instance: ["artichoke", "food"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["kitchen_fridge", "fridge"]
+  - instance: ["egg", "food"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["kitchen_fridge", "fridge"]
+  - instance: ["nicholas_phone", "phone"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["living_room_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: ["living_room_shelf_6", "surface" ]
+    - name: is_phone_ringing
+      value: false
+  - instance: ["spoon", "kitchenware"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["joshua_bedroom_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: ["joshua_bedroom_shelf_4", "surface" ]
+  - instance: ["dennis_phone", "phone"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["joshua_bedroom_shelf", "shelf"]
+    - name: on_shelf
+      value:
+        instance: ["joshua_bedroom_shelf_3", "surface" ]
+    - name: is_phone_ringing
+      value: false
+  - instance: ["black_pen", "pen"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["living_room_table", "table"]
+  - instance: ["emily_phone", "phone"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["stephanie_bedroom_table", "table"]
+    - name: is_phone_ringing
+      value: false
+  - instance: ["beige_pen", "pen"]
+    attributes:
+    - name: is_placed_at
+      value: 
+        instance: ["joshua_bedroom_table", "table"]
