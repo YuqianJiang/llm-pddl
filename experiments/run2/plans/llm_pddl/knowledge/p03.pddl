@@ -1,0 +1,5 @@
+(go-to robot joshua_bedroom_table stephanie_bedroom_shelf)
+(pick robot bowl stephanie_bedroom_shelf)
+(go-to robot stephanie_bedroom_shelf kitchen_sink)
+(place robot bowl kitchen_sink)
+; cost = 4 (unit cost)

@@ -42,10 +42,11 @@ DOMAINS = [
     "blocksworld",
     "floortile",
     "grippers",
+    "knowledge",
+    "manipulation",
     "storage",
     "termes",
     "tyreworld",
-    "manipulation"
 ]
 
 
@@ -152,6 +153,9 @@ class Blocksworld(Domain):
 class Manipulation(Domain):
     name = "manipulation" # this should match the directory name
 
+class Knowledge(Domain):
+    name = "knowledge" # this should match the directory name
+
 ###############################################################################
 #
 # The agent that leverages classical planner to help LLMs to plan
@@ -169,7 +173,6 @@ class Planner:
         with open(openai_keys_file, "r") as f:
             context = f.read()
         context_lines = context.strip().split('\n')
-        print(context_lines)
         return context_lines
 
     def create_llm_prompt(self, task_nl, domain_nl):
@@ -330,6 +333,15 @@ class Planner:
                  f"Now I have a new planning problem and its description is: \n {task_nl} \n" + \
                  f"Provide me with the problem PDDL file that describes " + \
                  f"the new planning problem directly without further explanations? Only return the PDDL file. Do not return anything else."
+        return prompt
+
+    def create_llm_kg_pddl_prompt(self, task_nl, domain_pddl):
+        prompt = f"I want you to plan for a robot. " + \
+                 f"Here are the rules. {domain_pddl} " + \
+                 f"Now {task_nl} \n" + \
+                 f"Provide me with a problem PDDL file that describes " + \
+                 f"the planning problem and the following context?" + \
+                 f"Only return the PDDL file. Do not return anything else."
         return prompt
 
     def query(self, prompt_text):
@@ -733,6 +745,122 @@ def llm_ic_planner(args, planner, domain):
     end_time = time.time()
     print(f"[info] task {task} takes {end_time - start_time} sec")
 
+def llm_kg_pddl_planner(args, planner, domain):
+    """
+    RAG method:
+        Build knowledge graph, retrieve relations based on keywords, generate PDDL file
+    """
+    from knowledge.kg_age import load_knowledge_to_graph
+    pgpass_file = os.path.expanduser("~/.pgpass")
+    with open(pgpass_file, "r") as f:
+        pgpass = f.read()
+    pgpass = pgpass.strip().split('\n')[1].split(':')
+    graph_store = load_knowledge_to_graph(host=pgpass[0], dbname=pgpass[2], user=pgpass[3], password=pgpass[4])
+
+    from llama_index import ServiceContext
+    from llama_index.storage.storage_context import StorageContext
+    from llama_index.llms import OpenAI
+    openai.api_key = planner.openai_api_keys[0]
+    llm = OpenAI(temperature=0, model="gpt-4")
+    service_context = ServiceContext.from_defaults(llm=llm)
+    storage_context = StorageContext.from_defaults(graph_store=graph_store)
+
+    from llama_index.query_engine import RetrieverQueryEngine
+    from llama_index.retrievers import KnowledgeGraphRAGRetriever
+    import io
+    from contextlib import redirect_stdout
+
+    graph_rag_retriever = KnowledgeGraphRAGRetriever(
+        storage_context=storage_context,
+        service_context=service_context,
+        llm=llm,
+        verbose=True,
+        graph_traversal_depth=3,
+        max_knowledge_sequence=200,
+    )
+
+    query_engine = RetrieverQueryEngine.from_args(
+        graph_rag_retriever, service_context=service_context
+    )
+
+    # context          = domain.get_context()
+    domain_pddl      = domain.get_domain_pddl()
+    domain_pddl_file = domain.get_domain_pddl_file()
+    # domain_nl        = domain.get_domain_nl()
+    # domain_nl_file   = domain.get_domain_nl_file()
+
+    # create the tmp / result folders
+    problem_folder = f"./experiments/run{args.run}/problems/llm_pddl/{domain.name}"
+    plan_folder    = f"./experiments/run{args.run}/plans/llm_pddl/{domain.name}"
+    result_folder  = f"./experiments/run{args.run}/results/llm_pddl/{domain.name}"
+
+    if not os.path.exists(problem_folder):
+        os.system(f"mkdir -p {problem_folder}")
+    if not os.path.exists(plan_folder):
+        os.system(f"mkdir -p {plan_folder}")
+    if not os.path.exists(result_folder):
+        os.system(f"mkdir -p {result_folder}")
+
+    task = args.task
+
+    start_time = time.time()
+
+    # A. generate problem pddl file
+    task_suffix        = domain.get_task_suffix(task)
+    log_file = f"./experiments/run{args.run}/results/llm_pddl/{domain.name}/{task}"
+    task_nl, task_pddl = domain.get_task(task)
+    task_nl = "I have a task for the robot: " + task_nl
+    prompt             = planner.create_llm_kg_pddl_prompt(task_nl, domain_pddl)
+    with open(log_file+".context.log", "w") as f:
+        with redirect_stdout(f):
+            nodes = query_engine.retrieve(task_nl)
+
+    raw_result = query_engine._response_synthesizer.synthesize(query=prompt, nodes=nodes).response
+    task_pddl_ = planner.parse_result(raw_result)
+
+    # B. write the problem file into the problem folder
+    task_pddl_file_name = f"./experiments/run{args.run}/problems/llm_pddl/{task_suffix}"
+    with open(task_pddl_file_name, "w") as f:
+        f.write(task_pddl_)
+    time.sleep(1)
+
+    # C. run fastforward to plan
+    plan_file_name = f"./experiments/run{args.run}/plans/llm_pddl/{task_suffix}"
+    sas_file_name  = f"./experiments/run{args.run}/plans/llm_pddl/{task_suffix}.sas"
+    os.system(f"python ./downward/fast-downward.py --alias {FAST_DOWNWARD_ALIAS} " + \
+              f"--search-time-limit {args.time_limit} --plan-file {plan_file_name} " + \
+              f"--sas-file {sas_file_name} " + \
+              f"{domain_pddl_file} {task_pddl_file_name}" + \
+              f"> {log_file}.pddl.log")
+
+    # D. collect the least cost plan
+    best_cost = 1e10
+    best_plan = None
+    for fn in glob.glob(f"{plan_file_name}.*"):
+        with open(fn, "r") as f:
+            try:
+                plans = f.readlines()
+                cost = get_cost(plans[-1])
+                if cost < best_cost:
+                    best_cost = cost
+                    best_plan = "\n".join([p.strip() for p in plans[:-1]])
+            except:
+                continue
+
+    # E. translate the plan back to natural language, and write it to result
+    # commented out due to exceeding token limit of gpt-4
+    '''
+    if best_plan:
+        plans_nl = planner.plan_to_language(best_plan, task_nl, domain_nl, domain_pddl)
+        plan_nl_file_name = f"./experiments/run{args.run}/results/llm_pddl/{task_suffix}"
+        with open(plan_nl_file_name, "w") as f:
+            f.write(plans_nl)
+    '''
+    end_time = time.time()
+    if best_plan:
+        print(f"[info] task {task} takes {end_time - start_time} sec, found a plan with cost {best_cost}")
+    else:
+        print(f"[info] task {task} takes {end_time - start_time} sec, no solution found")
 
 def print_all_prompts(planner):
     for domain_name in DOMAINS:
@@ -781,7 +909,8 @@ if __name__ == "__main__":
                                                        "llm_planner",
                                                        "llm_stepbystep_planner",
                                                        "llm_ic_planner",
-                                                       "llm_tot_ic_planner"],
+                                                       "llm_tot_ic_planner",
+                                                       "llm_kg_pddl_planner"],
                                               default="llm_ic_pddl_planner")
     parser.add_argument('--time-limit', type=int, default=200)
     parser.add_argument('--task', type=int, default=0)
@@ -797,12 +926,13 @@ if __name__ == "__main__":
 
     # 3. execute the llm planner
     method = {
-        "llm_ic_pddl_planner"   : llm_ic_pddl_planner,
-        "llm_pddl_planner"      : llm_pddl_planner,
-        "llm_planner"           : llm_planner,
-        "llm_stepbystep_planner": llm_stepbystep_planner,
-        "llm_ic_planner"        : llm_ic_planner,
-        "llm_tot_ic_planner"       : llm_tot_ic_planner,
+        "llm_ic_pddl_planner"       : llm_ic_pddl_planner,
+        "llm_pddl_planner"          : llm_pddl_planner,
+        "llm_planner"               : llm_planner,
+        "llm_stepbystep_planner"    : llm_stepbystep_planner,
+        "llm_ic_planner"            : llm_ic_planner,
+        "llm_tot_ic_planner"        : llm_tot_ic_planner,
+        "llm_kg_pddl_planner"       : llm_kg_pddl_planner
     }[args.method]
 
     if args.print_prompts:

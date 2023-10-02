@@ -1,6 +1,11 @@
 from typing import Any, Dict, List, Optional
 from llama_index.graph_stores.types import GraphStore
 
+try:
+    import psycopg2
+except ImportError:
+    raise ImportError("Please install psycopg2")
+
 class AgeGraphStore(GraphStore):
     def __init__(
         self,
@@ -13,10 +18,6 @@ class AgeGraphStore(GraphStore):
         node_label: str,
         **kwargs: Any,
     ) -> None:
-        try:
-            import psycopg2
-        except ImportError:
-            raise ImportError("Please install psycopg2")
         try:
             self._conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
         except psycopg2.OperationalError as err:
@@ -66,7 +67,10 @@ class AgeGraphStore(GraphStore):
                  f"$$) as (subj agtype, rel agtype);"
         )
         cur = self._conn.cursor()
-        cur.execute(query)
+        try:
+            cur.execute(query)
+        except psycopg2.errors.SyntaxError as err:
+            print (err)
         results = cur.fetchall()
         for row in results:
             for rel in eval(row[1]):
