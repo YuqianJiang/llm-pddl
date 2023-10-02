@@ -25,7 +25,7 @@ entities:
       - name: is_a
         value:
           concept: "location"
-  - instance: ["robot", "robot"]
+  - instance: ["robot", "robots"]
     attributes:
       - name: is_near
         value:

@@ -42,6 +42,7 @@ graph_store = AgeGraphStore(
     node_label="entity"
 )
 conn = graph_store.client()
+conn.autocommit = True
 
 # Create a new database session and return a new instance of the connection class
 cur = conn.cursor()
@@ -117,18 +118,14 @@ for row in cur.fetchall():
                         WHERE ea_float.attribute_name = '{predicate}'"
     add_bool_value_and_predicate_to_graph(predicate, attribute_query, cur)
 
+
 instance_of_query = "SELECT instance_of.entity_id AS start_id, 'entity' AS start_vertex_type, \
                      concepts.entity_id AS end_id, 'entity' AS end_vertex_type \
                   FROM instance_of \
                   INNER JOIN concepts ON instance_of.concept_name = concepts.concept_name \
                   WHERE instance_of.concept_name != 'pose' and instance_of.concept_name != 'region' and instance_of.concept_name != 'map' \
                   ORDER BY start_id ASC "
-# add_predicate_to_graph('instance_of', instance_of_query, cur)
-
-conn.commit()
-cur.close()
-
-print (graph_store.get_rel_map(["table"]))
+add_predicate_to_graph('instance_of', instance_of_query, cur)
 
 from llama_index import ServiceContext
 from llama_index.storage.storage_context import StorageContext
@@ -155,25 +152,22 @@ query_engine = RetrieverQueryEngine.from_args(
 )
 
 
-query = "I have a task for the robot: Can you put the beige pen on the living room table?"
+# query = "I have a task for the robot: Can you put the beige pen on the living room table?"
+# query = "I have a task for the robot: Can you bring back the spoon?"
+query = "I have a task for the robot: Can you put the bowl in the sink?"
+print (query)
 nodes = query_engine.retrieve(query)
 prompt = f"I want you to plan for a robot. " + \
          f"Here are the rules. {domain_pddl} " + \
          f"Now {query} \n" + \
-         f"Provide me with the problem PDDL file that describes " + \
+         f"Provide me with a problem PDDL file that describes " + \
          f"the planning problem and the following context?" +\
          f"Only return the PDDL file. Do not return anything else."
 response = query_engine._response_synthesizer.synthesize(
                 query=prompt,
                 nodes=nodes,
             )
-# response = query_engine.query("Where is the sink?")
-# response = query_engine.query("Where is the robot?")
-# response = query_engine.query("Where can the robot go to find an apple?")
-# response = query_engine.query("What type of objects can you find on the desk?")
-# response = query_engine.query("How tall is the highest level of pantry?")
-# response = query_engine.query("How wide is the desk?")
-# response = query_engine.query("What objects are in the kitchen?")
+
 print (response)
 
 conn.close()

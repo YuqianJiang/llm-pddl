@@ -500,9 +500,9 @@ $$
 INSERT INTO entities
 VALUES (1), (2), (3), (4), (5), (6), (7);
 INSERT INTO concepts
-VALUES (2, 'robot'), (3, 'map'), (4, 'point'), (5, 'pose'), (6, 'region'), (7, 'door');
+VALUES (2, 'robots'), (3, 'map'), (4, 'point'), (5, 'pose'), (6, 'region'), (7, 'door');
 INSERT INTO instance_of
-VALUES (1, 'robot');
+VALUES (1, 'robots');
 INSERT INTO entity_attributes_str
 VALUES (1, 'name', 'robot');
 

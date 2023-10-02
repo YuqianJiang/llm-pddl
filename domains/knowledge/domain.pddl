@@ -1,8 +1,8 @@
 (define (domain robot)
     (:requirements :strips :typing)
-    (:types location object room robot surface channel- entity
-            phone food kitchenware pen - object
-            table shelf window light fridge light sink rv - location)
+    (:types location object room robot surface channel - entity
+            phone food kitchenware pen book - object
+            table shelf window light fridge light sink tv - location)
     (:predicates
           (has ?e1 - entity ?e2 - entity)
           (is_near ?r - robot ?l - location)
